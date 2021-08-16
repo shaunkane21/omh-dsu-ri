@@ -1,23 +1,80 @@
-# MongoDB is used to store data points and user account information.
-mongo:
-  image: mongo:latest
+version: '3.2'
 
-# PostgreSQL is used to store OAuth 2.0 client credentials and access tokens.
-postgres:
-  image: postgres:latest
+services: 
+  # MongoDB is used to store data points and user account information.
+  mongo:
+    image: mongo:latest
 
-authorizationserver:
-  image: openmhealth/omh-dsu-authorization-server:latest
-  links:
-    - mongo:omh-mongo
-    - postgres:omh-postgres
-  ports:
-    - "8082:8082"
+  # PostgreSQL is used to store OAuth 2.0 client credentials and access tokens.
+  postgres:
+    build: resources/rdbms/postgresql
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    ports:
+      - "5432:5432"
 
-resourceserver:
-  image: openmhealth/omh-dsu-resource-server:latest
-  links:
-    - mongo:omh-mongo
-    - postgres:omh-postgres
-  ports:
-    - "8083:8083"
+  authorizationserver:
+    build: authorization-server/docker
+    image: omh-dsu-authorization-server
+    links:
+      - mongo:omh-mongo
+      - postgres:omh-postgres
+    ports:
+      - "8082:8082"
+
+  resourceserver:
+    build: resource-server/docker
+    image: omh-dsu-resource-server
+    links:
+      - mongo:omh-mongo
+      - postgres:omh-postgres
+    ports:
+      - "8083:8083"
+        
+
+  sieve_client:
+    build:
+      context: ./team-violet-code/sieve-client
+    image: sieve_client
+    volumes:
+      - type: bind
+        source: ./team-violet-code/sieve-client
+        target: /app
+      - /app/node_modules
+    ports:
+      - "4200:4200"
+    networks:
+      - isolation-network
+      - dockernet
+    links: 
+      - storage_provider
+
+  storage_provider:
+    build:
+      context: ./team-violet-code/storage-provider
+    image: storage_provider
+    ports:
+      - "5050:5000"
+    volumes:
+      - .:/code/source
+    environment: 
+      - DB=mongodb://mongodb:27017/sieve
+      - PYTHONUNBUFFERED=1
+    networks:
+      - isolation-network
+      - dockernet
+
+  sieve_mongo:
+    image: mongo:latest
+    networks:
+      - isolation-network
+      - dockernet
+volumes: 
+  mongodbdata:
+    driver: local
+
+networks:
+  isolation-network:
+    driver: bridge
+  dockernet:
+    external: true

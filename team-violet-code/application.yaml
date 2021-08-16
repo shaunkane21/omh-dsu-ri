@@ -1,0 +1,43 @@
+output:
+  # whether to write data points to the "console" or to a "file", defaults to "console"
+  destination: file
+  file:
+    # the file to write the data points to, defaults to "output.json"
+    filename: output.json
+    # true if the file should be appended to, false if it should be overwritten, defaults to true
+    append: true
+
+data:
+  header:
+    # the user to associate the data points with, defaults to "some-user"
+    user-id: John Doe
+  start-date-time: 2015-01-01T12:00:00Z        # defaults to January 1st, 2014 at noon UTC
+  end-date-time: 2015-03-01T12:00:00Z          # defaults to January 1st, 2015 at noon UTC
+  suppress-night-time-measures: true           # defaults to false
+
+  measure-generation-requests:
+  - generator: blood-pressure
+    mean-inter-point-duration: PT12h           # defaults to PT24h
+    trends:
+      ? systolic-in-mmhg
+      : start-value: 110
+        end-value: 125
+        minimum-value: 100
+        maximum-value: 140
+        standard-deviation: 3
+      ? diastolic-in-mmhg
+      : start-value: 70
+        end-value: 80
+        minimum-value: 60
+        maximum-value: 90
+        standard-deviation: 3
+
+  - generator: body-weight
+    mean-inter-point-duration: PT6h
+    trends:
+      ? weight-in-kg
+      : start-value: 55
+        end-value: 60
+        minimum-value: 50
+        maximum-value: 65
+        standard-deviation: 0.1

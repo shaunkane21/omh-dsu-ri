@@ -35,6 +35,7 @@ import org.openmhealth.schema.domain.omh.SchemaId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.RestTemplate;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -91,10 +92,16 @@ public class DataPointController {
     public static final String RESULT_OFFSET_PARAMETER = "skip";
     public static final String RESULT_LIMIT_PARAMETER = "limit";
     public static final String DEFAULT_RESULT_LIMIT = "5000";
+   
 
     @Autowired
     private DataPointService dataPointService;
+    private final RestTemplate restTemplate;
 
+    public DataPointController(RestTemplateBuilder restTemplateBuilder)
+    {
+        this.restTemplate = restTemplateBuilder.build();
+    }
     /**
      * Reads data points.
      *
@@ -125,7 +132,8 @@ public class DataPointController {
             @RequestParam(value = CREATED_BEFORE_PARAMETER, required = false) final OffsetDateTime createdBefore,
             @RequestParam(value = RESULT_OFFSET_PARAMETER, defaultValue = "0") final Integer offset,
             @RequestParam(value = RESULT_LIMIT_PARAMETER, defaultValue = DEFAULT_RESULT_LIMIT) final Integer limit,
-            Authentication authentication) {
+            Authentication authentication
+            ) {
 
         // TODO add validation or explicitly comment that this is handled using exception translators
 
@@ -155,6 +163,7 @@ public class DataPointController {
 
         return new ResponseEntity<>(dataPoints, headers, OK);
     }
+    
 
     
     @PreAuthorize("#oauth2.clientHasRole('" + CLIENT_ROLE + "') and #oauth2.hasScope('" + DATA_POINT_READ_SCOPE + "')")
@@ -238,7 +247,30 @@ public class DataPointController {
     }
 
     /**
-     * Writes a data point.
+     * Starts a Sieve Import
+     */
+    @PreAuthorize("#oauth2.clientHasRole('" + CLIENT_ROLE + "') and #oauth2.hasScope('" + DATA_POINT_READ_SCOPE + "')")
+    @RequestMapping(value = "/sieve", method = GET, produces = APPLICATION_JSON_VALUE)
+    public String startSieveImport(@RequestBody Authentication authentication) {
+        String url = "https://localhost:5050/storage/import";
+        return this.restTemplate.getForObject(url, String.class);
+    }
+
+    /**
+     * Receives ACS and ABE encryption keys from Sieve client
+     */
+    @PreAuthorize("#oauth2.clientHasRole('" + CLIENT_ROLE + "') and #oauth2.hasScope('" + DATA_POINT_READ_SCOPE + "')")
+    @RequestMapping(value = "/keys", method = POST, produces = APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> receiveKeys(@RequestBody @Valid DataPoint dataPoint, Authentication authentication )
+    {
+        String acs_policy = dataPoint.getHeader();
+        String encrypted_text = dataPoint.getHeader().getId();
+
+        
+
+    }
+    /**
+     * Unencrypts and then writes a data point.
      *
      * @param dataPoint the data point to write
      * @throws URISyntaxException 

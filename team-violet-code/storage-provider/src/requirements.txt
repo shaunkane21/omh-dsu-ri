@@ -1,0 +1,8 @@
+requests==2.18.1
+Flask==0.12.2
+pymongo==3.4.0
+flask_pymongo==0.5.1
+flask_restx==0.2.0
+werkzeug == 0.16.1
+flask-cors==3.0.8
+charm-crypto==0.43
