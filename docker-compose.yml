@@ -7,20 +7,24 @@ services:
 
   # PostgreSQL is used to store OAuth 2.0 client credentials and access tokens.
   postgres:
+    image: postgres:latest
     build: resources/rdbms/postgresql
+    restart: always
     environment:
       - POSTGRES_HOST_AUTH_METHOD=trust
     ports:
       - "5432:5432"
 
+
   authorizationserver:
-    build: authorization-server/docker
-    image: omh-dsu-authorization-server
+    image: openmhealth/omh-dsu-authorization-server:latest
     links:
       - mongo:omh-mongo
       - postgres:omh-postgres
     ports:
       - "8082:8082"
+
+      
 
   resourceserver:
     build: resource-server/docker
@@ -30,12 +34,13 @@ services:
       - postgres:omh-postgres
     ports:
       - "8083:8083"
-        
+    # links:
+    #   - storage_provider
+
 
   sieve_client:
     build:
       context: ./team-violet-code/sieve-client
-    image: sieve_client
     volumes:
       - type: bind
         source: ./team-violet-code/sieve-client
@@ -43,38 +48,28 @@ services:
       - /app/node_modules
     ports:
       - "4200:4200"
-    networks:
-      - isolation-network
-      - dockernet
-    links: 
-      - storage_provider
+    # links: 
+    #   - storage_provider
 
   storage_provider:
     build:
       context: ./team-violet-code/storage-provider
-    image: storage_provider
     ports:
       - "5050:5000"
     volumes:
-      - .:/code/source
+      - .:/code/src
     environment: 
       - DB=mongodb://mongodb:27017/sieve
       - PYTHONUNBUFFERED=1
-    networks:
-      - isolation-network
-      - dockernet
+    # privileged: true
+    # networks:
+    #   - isolation-network
+    #   - dockernet
 
-  sieve_mongo:
+  mongodb:
     image: mongo:latest
-    networks:
-      - isolation-network
-      - dockernet
+    restart: always
+
 volumes: 
   mongodbdata:
     driver: local
-
-networks:
-  isolation-network:
-    driver: bridge
-  dockernet:
-    external: true

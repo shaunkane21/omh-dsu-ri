@@ -10,6 +10,14 @@ import { MatTabsModule } from '@angular/material/tabs';
 import {MatToolbarModule } from '@angular/material/toolbar';
 import { KeysComponent } from './keys/keys.component';
 import { AngularFileUploaderModule } from "angular-file-uploader";
+import {MatChipsModule} from '@angular/material/chips';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+import {MatButtonModule} from '@angular/material/button';
+import {MatDividerModule} from '@angular/material/divider';
+import {MatAutocompleteModule} from '@angular/material/autocomplete';
+import {MatListModule} from '@angular/material/list';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -24,7 +32,15 @@ import { AngularFileUploaderModule } from "angular-file-uploader";
     BrowserAnimationsModule,
     MatTabsModule,
     MatToolbarModule,
-    AngularFileUploaderModule
+    AngularFileUploaderModule,
+    MatChipsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatDividerModule,
+    MatAutocompleteModule,
+    MatListModule, 
+    FormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -49,6 +49,7 @@ subprojects {
         compile 'org.springframework:spring-beans'
         compile "org.springframework.boot:spring-boot-autoconfigure"
         compile 'org.springframework:spring-context'
+        compile 'org.springframework:spring-web'
         compile "org.springframework.security.oauth:spring-security-oauth2"
         compile 'javax.validation:validation-api'
         

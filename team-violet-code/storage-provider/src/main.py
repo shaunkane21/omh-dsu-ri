@@ -2,6 +2,7 @@ from flask import Flask
 from flask_pymongo import PyMongo
 from flask_restx import Api, Resource
 from flask_cors import CORS
+from bson import ObjectId
 import json
 import datetime
 import os
@@ -21,7 +22,8 @@ class JSONEncoder(json.JSONEncoder):
 
 app = Flask(__name__)
 CORS(app)
-app.config['MONGO_URI'] = os.environ.get('DB')
+app.config["MONGO_URI"] = "mongodb://mongodb:27017/sieve"
+# app.config['MONGO3_PORT'] = 27019
 mongo = PyMongo(app)
 
 app.json_encoder = JSONEncoder
@@ -31,6 +33,7 @@ api = Api(app)
 
 #These imports need to be below the path_planning = PathPlanning() and comms_manager = Communications()
 from .storage_provider import StorageProvider
+
 
 print('Hello world!', file=sys.stderr)
 print('This is error output', file=sys.stderr)

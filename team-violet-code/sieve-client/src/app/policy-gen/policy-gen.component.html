@@ -1,1 +1,14 @@
-<p>policy-gen works!</p>
+
+<mat-list>
+    <div mat-subheader>Requestors</div>
+    <mat-list-item *ngFor="let r of requestors">
+      <div mat-line>{{r.name}}</div>
+      <form class="example-form">
+        <mat-form-field class="example-full-width" appearance="fill">
+          <mat-label>Favorite food</mat-label>
+          <input matInput placeholder="(doctor='Smith' AND date>2010)" [(ngModel)]="accessPolicy">
+        </mat-form-field>
+      </form>
+    </mat-list-item>
+    <mat-divider></mat-divider>
+  </mat-list>

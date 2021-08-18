@@ -39,7 +39,20 @@ securitySchemes:
       accessTokenUri: http://domain/oauth/token
       authorizationGrants: [code, token, owner]
       scopes: [read_data_points, write_data_points, delete_data_points]
-
+/keys:
+  post:
+    description: get encryption keys
+    securedBy: [oauth_2_0]
+    body:
+      application/json:
+        schema:  
+            {
+              "GUID": "string",
+              "k": "string",
+            }
+    responses:
+      201:
+        description: the data point has been decrypted
 /dataPoints:
   get:
     description: get a list of data points matching some criteria

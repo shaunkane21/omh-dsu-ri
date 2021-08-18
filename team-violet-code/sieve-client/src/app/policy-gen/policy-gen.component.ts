@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ApiService } from '../api.service';
 
 @Component({
   selector: 'app-policy-gen',
@@ -7,9 +8,14 @@ import { Component, OnInit } from '@angular/core';
 })
 export class PolicyGenComponent implements OnInit {
 
-  constructor() { }
-
+  constructor(private api: ApiService) { }
+  requestors;
+  accessPolicy = "";
   ngOnInit(): void {
+    this.api.getRequestors().subscribe( res => {
+      console.log(res);
+      this.requestors = res["result"]
+    });
   }
 
 }

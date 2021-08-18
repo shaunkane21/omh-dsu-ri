@@ -24,8 +24,14 @@ import utils.DataFile;
 import utils.SchemaFile;
 import utils.ValidationSummary;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.json.JSONException;
+import org.json.simple.parser.JSONParser;
+import org.json.JSONObject.*;
 import org.json.JSONObject;
+import org.json.*;
 import org.openmhealth.dsu.domain.DataPointSearchCriteria;
 import org.openmhealth.dsu.domain.EndUserUserDetails;
 import org.openmhealth.dsu.service.DataPointService;
@@ -35,7 +41,7 @@ import org.openmhealth.schema.domain.omh.SchemaId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.RestTemplate;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -48,6 +54,7 @@ import com.github.fge.jsonschema.core.report.ProcessingReport;
 import com.github.fge.jsonschema.examples.Utils;
 import com.github.fge.jsonschema.main.JsonSchema;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
+import org.springframework.context.annotation.Bean;
 
 import javax.validation.Valid;
 
@@ -56,18 +63,31 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.OffsetDateTime;
-import java.util.Optional;
+import java.util.*;
+import java.security.MessageDigest;
+import java.lang.Object.*;
+import javax.crypto.spec.*;
+import java.nio.charset.StandardCharsets;
+import javax.crypto.Cipher;
+import java.security.DigestException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import static org.openmhealth.dsu.configuration.OAuth2Properties.*;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.*;
+import static org.springframework.web.bind.annotation.RequestMethod.*; 
 
 
 /**
@@ -77,6 +97,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
  */
 @ApiController
 public class DataPointController {
+
 
     /*
      * These filtering parameters are temporary. They will likely change when a more generic filtering approach is
@@ -96,12 +117,12 @@ public class DataPointController {
 
     @Autowired
     private DataPointService dataPointService;
-    private final RestTemplate restTemplate;
+    private static final Logger log = LoggerFactory.getLogger(DataPointController.class);
 
-    public DataPointController(RestTemplateBuilder restTemplateBuilder)
-    {
-        this.restTemplate = restTemplateBuilder.build();
-    }
+	// @Bean
+	// public RestTemplate restTemplate(RestTemplateBuilder builder) {
+	// 	return builder.build();
+	// }
     /**
      * Reads data points.
      *
@@ -250,25 +271,181 @@ public class DataPointController {
      * Starts a Sieve Import
      */
     @PreAuthorize("#oauth2.clientHasRole('" + CLIENT_ROLE + "') and #oauth2.hasScope('" + DATA_POINT_READ_SCOPE + "')")
-    @RequestMapping(value = "/sieve", method = GET, produces = APPLICATION_JSON_VALUE)
-    public String startSieveImport(@RequestBody Authentication authentication) {
-        String url = "https://localhost:5050/storage/import";
-        return this.restTemplate.getForObject(url, String.class);
+    @RequestMapping(value = "/sieve", method = {HEAD,GET}, produces = APPLICATION_JSON_VALUE)
+    public @ResponseBody ResponseEntity<?> startSieveImport() {
+        // String url = "https://localhost:5050/storage/import";
+        // return this.restTemplate.getForObject(url, String.class);
+
+  // String command = "curl -X GET http://backend:5000/storage/import";
+        try {
+            URL url = new URL("storage_provider:5000/storage/import");
+
+            HttpURLConnection http = (HttpURLConnection)url.openConnection();
+            http.setRequestProperty("Accept", "application/json");
+    
+            System.out.println(http.getResponseCode() + " " + http.getResponseMessage());
+
+            http.disconnect();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+        
+        // try {
+        //     Process process = Runtime.getRuntime().exec(command);
+        //     InputStream input = process.getInputStream();
+        //     int code = process.exitValue();
+        //     process.destroy();
+        // } catch (IOException e) {
+        //     e.printStackTrace();
+        // }
+        return new ResponseEntity<>(0 == 0 ? NOT_FOUND : OK);
+
     }
 
     /**
      * Receives ACS and ABE encryption keys from Sieve client
      */
     @PreAuthorize("#oauth2.clientHasRole('" + CLIENT_ROLE + "') and #oauth2.hasScope('" + DATA_POINT_READ_SCOPE + "')")
-    @RequestMapping(value = "/keys", method = POST, produces = APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> receiveKeys(@RequestBody @Valid DataPoint dataPoint, Authentication authentication )
+    @RequestMapping(value = "/sieve/{id}", method = GET, produces = APPLICATION_JSON_VALUE)
+    public @ResponseBody ResponseEntity<?> receiveKeys(@PathVariable String id )
     {
-        String acs_policy = dataPoint.getHeader();
-        String encrypted_text = dataPoint.getHeader().getId();
+        // String[] values = acs.split(",");
+        String cipherText = "";
+        String decryptedText = ""; 
+        BufferedReader rd  = null;
+        StringBuilder sb = null;
+        String line = null;
+        String k = "asdjk@15r32r1234asdsaeqwe314SEFT";
+        try {
+           // id = data.getString("GUID");
+           // k = data.getString("k");
+            URL url = new URL("http://storage_provider:5000/storage/"+id);
+            HttpURLConnection http = (HttpURLConnection)url.openConnection();
+            http.setRequestMethod("GET");
+            http.connect();
+            int responseCode = http.getResponseCode();
+            System.out.println("GET Response Code :: " + responseCode);
+            rd  = new BufferedReader(new InputStreamReader(http.getInputStream()));
+            sb = new StringBuilder();
+  
+            while ((line = rd.readLine()) != null)
+            {
+                sb.append(line + '\n');
+            }
+            JSONObject json = new JSONObject(new JSONTokener(sb.toString()));
+            String result = json.getString("result");
+            JSONObject val = new JSONObject(new JSONTokener(result.toString()));
+            cipherText = val.getString("value");
+            log.warn("Ciphertext: ", cipherText);
+            //return sb.toString();
+            http.disconnect();
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+            return new ResponseEntity<>(decryptedText, NOT_FOUND);
+        }
 
+        // String command = "curl -X GET http://backend:5000/storage/ABE/"+id + "-H 'accept: application/json'";
         
+        // try {
+        //     Process process = Runtime.getRuntime().exec(command);
+        //     InputStream input = process.getInputStream();
+        //     int code = process.exitValue();
+        //     process.destroy();
+        // } catch (IOException e) {
+        //     e.printStackTrace();
+        // }
+        try {
+            byte[] cipherData = Base64.getDecoder().decode(cipherText);
+            byte[] saltData = Arrays.copyOfRange(cipherData, 8, 16);
+            String secret = k;
+    
+            MessageDigest md5 = MessageDigest.getInstance("MD5");
+            final byte[][] keyAndIV = GenerateKeyAndIV(32, 16, 1, saltData, secret.getBytes(StandardCharsets.UTF_8), md5);
+            SecretKeySpec key = new SecretKeySpec(keyAndIV[0], "AES");
+            IvParameterSpec iv = new IvParameterSpec(keyAndIV[1]);
+    
+            byte[] encrypted = Arrays.copyOfRange(cipherData, 16, cipherData.length);
+            Cipher aesCBC = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            aesCBC.init(Cipher.DECRYPT_MODE, key, iv);
+            byte[] decryptedData = aesCBC.doFinal(encrypted);
+            decryptedText = new String(decryptedData, StandardCharsets.UTF_8);
+            
+
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+            return new ResponseEntity<>(decryptedText, NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(decryptedText, OK);
 
     }
+
+    /**
+ * Generates a key and an initialization vector (IV) with the given salt and password.
+ * <p>
+ * This method is equivalent to OpenSSL's EVP_BytesToKey function
+ * (see https://github.com/openssl/openssl/blob/master/crypto/evp/evp_key.c).
+ * By default, OpenSSL uses a single iteration, MD5 as the algorithm and UTF-8 encoded password data.
+ * </p>
+ * @param keyLength the length of the generated key (in bytes)
+ * @param ivLength the length of the generated IV (in bytes)
+ * @param iterations the number of digestion rounds 
+ * @param salt the salt data (8 bytes of data or <code>null</code>)
+ * @param password the password data (optional)
+ * @param md the message digest algorithm to use
+ * @return an two-element array with the generated key and IV
+ */
+public static byte[][] GenerateKeyAndIV(int keyLength, int ivLength, int iterations, byte[] salt, byte[] password, MessageDigest md) {
+
+    int digestLength = md.getDigestLength();
+    int requiredLength = (keyLength + ivLength + digestLength - 1) / digestLength * digestLength;
+    byte[] generatedData = new byte[requiredLength];
+    int generatedLength = 0;
+
+    try {
+        md.reset();
+
+        // Repeat process until sufficient data has been generated
+        while (generatedLength < keyLength + ivLength) {
+
+            // Digest data (last digest if available, password data, salt if available)
+            if (generatedLength > 0)
+                md.update(generatedData, generatedLength - digestLength, digestLength);
+            md.update(password);
+            if (salt != null)
+                md.update(salt, 0, 8);
+            md.digest(generatedData, generatedLength, digestLength);
+
+            // additional rounds
+            for (int i = 1; i < iterations; i++) {
+                md.update(generatedData, generatedLength, digestLength);
+                md.digest(generatedData, generatedLength, digestLength);
+            }
+
+            generatedLength += digestLength;
+        }
+
+        // Copy key and IV into separate byte arrays
+        byte[][] result = new byte[2][];
+        result[0] = Arrays.copyOfRange(generatedData, 0, keyLength);
+        if (ivLength > 0)
+            result[1] = Arrays.copyOfRange(generatedData, keyLength, keyLength + ivLength);
+
+        return result;
+
+    } catch (DigestException e) {
+        throw new RuntimeException(e);
+
+    } finally {
+        // Clean out temporary data
+        Arrays.fill(generatedData, (byte)0);
+    }
+}
+
     /**
      * Unencrypts and then writes a data point.
      *
