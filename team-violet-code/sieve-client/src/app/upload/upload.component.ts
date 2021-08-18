@@ -74,39 +74,35 @@ export class UploadComponent implements OnInit {
   }
 
   AESencryptAndUpload(): void {
+    var enc_key = CryptoJS.enc.Base64.parse(this.keys.getAESKey());
+    var iv = CryptoJS.enc.Base64.parse('IVIVIVIVIVIVIVIV');
     console.log(this.uploaded_data.toString());
-    this.encryptionOutput = CryptoJS.AES.encrypt(this.uploaded_data.toString().trim(), this.keys.getAESKey());
-    console.log(this.encryptionOutput);
-    var val = this.encryptionOutput['ciphertext'].toString();
-    var data = {"value": val};
     console.log("start upload" + data);
+    this.encryptionOutput = CryptoJS.AES.encrypt(this.uploaded_data.toString().trim(), this.keys.getAESKey());
+    console.log("output " + this.encryptionOutput);
+    var val = this.encryptionOutput.toString();
+    var data = {"value": val};
+    
     this.api.postEncryptedData(data).subscribe((data: any) => {
-      console.log("GUID: " + data.result.GUID);
       var guid = data.result.GUID.toString();
       console.log(guid);
       var k = this.keys.getAESKey();
-      console.log(k);
-      console.log(this.fruits);
       var attrs = [];
       for (var idx in this.fruits)
       {
         var tmp = this.fruits[idx];
-        console.log(tmp.name);
         var name = tmp.name;
         attrs[idx] = tmp.name;
       }
       var key = attrs.toString();
-      console.log(key);
       var val = {"GUID": guid, "k": k};
       var dataVal = val.toString();
       var abeData = {
         "key": key,
         "value": dataVal
       };
-      console.log(abeData);
       this.api.postABEEncryptionInfo(abeData).subscribe((data:any) => {
         this.keys.setAttrList(this.fruits);
-        console.log("abe post" + data.result);
         var mHealth = {
           'id' : guid.toString(),
           'key': k.toString()

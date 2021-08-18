@@ -1,21 +1,26 @@
-<input type="file" name="files" (change)="onFileChanged($event)" />
-<mat-divider></mat-divider>
-<div>
-    <mat-form-field class="example-chip-list" appearance="fill">
-        <mat-label>Attributes</mat-label>
-        <mat-chip-list #chipList aria-label="Fruit selection">
-          <mat-chip *ngFor="let fruit of fruits" [selectable]="selectable"
-                   [removable]="removable" (removed)="remove(fruit)">
-            {{fruit.name}}
-            <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
-          </mat-chip>
-          <input placeholder="New attribute..."
-                 [matChipInputFor]="chipList"
-                 [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-                 [matChipInputAddOnBlur]="addOnBlur"
-                 (matChipInputTokenEnd)="add($event)">
-        </mat-chip-list>
-      </mat-form-field>
+<div id="wrapper">
+  <p>1. Choose a data file</p>
+  <input type="file" name="files" (change)="onFileChanged($event)" />
+  <mat-divider></mat-divider>
+  <div>
+    <p>2. Assign attributes to data</p>
+      <mat-form-field class="example-chip-list" appearance="fill">
+          <mat-label>Attributes</mat-label>
+          <mat-chip-list #chipList aria-label="Fruit selection">
+            <mat-chip *ngFor="let fruit of fruits" [selectable]="selectable"
+                     [removable]="removable" (removed)="remove(fruit)">
+              {{fruit.name}}
+              <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+            </mat-chip>
+            <input placeholder="New attribute..."
+                   [matChipInputFor]="chipList"
+                   [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                   [matChipInputAddOnBlur]="addOnBlur"
+                   (matChipInputTokenEnd)="add($event)">
+          </mat-chip-list>
+        </mat-form-field>
+  </div>
+  <mat-divider></mat-divider>
+  <p>3. Encrypt & Upload</p>
+  <button mat-raised-button color="primary" (click)="AESencryptAndUpload()">Upload</button>
 </div>
-<mat-divider></mat-divider>
-<button mat-raised-button color="primary" (click)="AESencryptAndUpload()">Upload</button>

@@ -1,0 +1,9 @@
+#wrapper {
+    margin-left: 5%;
+    margin-top: 5%;
+
+}
+
+#wrapper.example-chip-list {
+    width: 100%;
+  }

@@ -1,27 +1,26 @@
 from Crypto.Cipher import AES
 import base64, json, math
-from optparse import OptionParser
+import datetime
 
+# parser = OptionParser()
+# parser.add_option("-f", "--file", dest="filename",help="path to json file", metavar="FILE")
+# parser.add_option("-o", "--outdir",dest="path", help="full path output directory")
+# parser.add_option("-n", "--name", dest="name",help="name for files", metavar="NAME")
+# parser.add_option("-e", "--enc", dest="en",help="encrypt", metavar="flag")
+# parser.add_option("-d", "--dec", dest="dec",help="decrypt", metavar="flag")
+# (options, args) = parser.parse_args()
 
-parser = OptionParser()
-parser.add_option("-f", "--file", dest="filename",help="path to json file", metavar="FILE")
-parser.add_option("-o", "--outdir",dest="path", help="full path output directory")
-parser.add_option("-n", "--name", dest="name",help="name for files", metavar="NAME")
-parser.add_option("-e", "--enc", dest="en",help="encrypt", metavar="flag")
-parser.add_option("-d", "--dec", dest="dec",help="decrypt", metavar="flag")
-(options, args) = parser.parse_args()
-
-jsn=options.filename
-outn=options.name
-outd=options.path
+# jsn=options.filename
+# outn=options.name
+# outd=options.path
 
 # AES key must be either 16, 24, or 32 bytes long
 COMMON_ENCRYPTION_KEY='asdjk@15r32r1234asdsaeqwe314SEFT'
 # Make sure the initialization vector is 16 bytes
 COMMON_16_BYTE_IV_FOR_AES="IVIVIVIVIVIVIVIV"
 
-def obj_dict(obj):
-	return obj.__dict__
+# def obj_dict(obj):
+# 	return obj.__dict__
 
 def get_common_cipher():
 	return AES.new(COMMON_ENCRYPTION_KEY,AES.MODE_CBC,COMMON_16_BYTE_IV_FOR_AES)
@@ -52,16 +51,13 @@ def decrypt_json_with_common_cipher(json_ciphertext):
 twts = []
 for line in open(jsn, 'r'):
 	twts.append(json.loads(line))
-json_string = json.dumps(twts, default=obj_dict)
+json_string = json.dumps(twts)
 
-if(options.en):
-	json_ciphertext = encrypt_json_with_common_cipher(json_string)
-	file = open(outn+"_encrypt.txt", "w")
-	file.write(json_ciphertext)
-	file.close
-	#json_ciphertext = encrypt_json_with_common_cipher(json_string)
-	decryped_json_obj = decrypt_json_with_common_cipher(json_ciphertext)
-	file1 = open(outn+"_decrypt.txt", "w")
-	file1.write(decryped_json_obj)
-	file1.close
+print(str(datetime.datetime.now()))
+json_ciphertext = encrypt_json_with_common_cipher(json_string)
+print(json_ciphertext)
+#json_ciphertext = encrypt_json_with_common_cipher(json_string)
+decryped_json_obj = decrypt_json_with_common_cipher(json_ciphertext)
+print(decryped_json_obj)
+print(str(datetime.datetime.now()))
 

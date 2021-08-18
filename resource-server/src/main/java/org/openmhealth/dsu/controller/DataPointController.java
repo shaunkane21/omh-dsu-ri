@@ -332,13 +332,17 @@ public class DataPointController {
   
             while ((line = rd.readLine()) != null)
             {
-                sb.append(line + '\n');
+                System.out.println(line);
+                sb.append(line);
             }
+            System.out.println("sb: "+ sb);
             JSONObject json = new JSONObject(new JSONTokener(sb.toString()));
-            String result = json.getString("result");
-            JSONObject val = new JSONObject(new JSONTokener(result.toString()));
-            cipherText = val.getString("value");
-            log.warn("Ciphertext: ", cipherText);
+            System.out.println("sb: "+ sb.toString());
+            String result = json.getJSONObject("result").getString("value");
+            // System.out.println("result: "+ result);
+            // JSONObject val = new JSONObject(new JSONTokener(result.toString()));
+            cipherText = result;
+            System.out.println("Ciphertext: "+ cipherText);
             //return sb.toString();
             http.disconnect();
         } catch (Exception e)
@@ -373,7 +377,7 @@ public class DataPointController {
             byte[] decryptedData = aesCBC.doFinal(encrypted);
             decryptedText = new String(decryptedData, StandardCharsets.UTF_8);
             
-
+            System.out.println(decryptedText);
         } catch (Exception e)
         {
             e.printStackTrace();
