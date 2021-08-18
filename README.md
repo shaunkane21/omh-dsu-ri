@@ -1,3 +1,20 @@
+# Team Violet Code Description
+This repository holds code for Team Violet's re-implementation of Sieve and integration with Open mHealth. This repo contains 4 microservices: 
+* Sieve client
+* Storage Provider
+* Resource Server (mHealth)
+* Authorization Server (mHealth)
+
+There are also 3 databases brought up by docker-compose. To run this project, you must first build the mHealth services with gradle. Then from the root directory, run a docker-compose build. Then docker-compose up. There are then several steps that need to be taken to obtain a authorization token from open mHealth. 
+
+All of Team-Violet original code exists in the team-violet-code directory. We also made changes to the mHealth code to create Sieve's import daemon. 
+
+
+
+
+
+
+
 # Open mHealth Storage Endpoint [![Build Status](https://travis-ci.org/openmhealth/omh-dsu-ri.svg?branch=master)](https://travis-ci.org/openmhealth/omh-dsu-ri)
 
 This repository contains the Java reference implementation of an [Open mHealth](http://www.openmhealth.org/)
